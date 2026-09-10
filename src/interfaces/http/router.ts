@@ -6,7 +6,7 @@ import { handleRepoRoute, handleReposRoute } from './routes/repos';
 import { handleHealthRoute } from './routes/health';
 import { handleInfoRoute } from './routes/info';
 import { handleRootRoute } from './routes/root';
-import { openApiSpec } from './routes/openapi';
+import { openApiSpec } from './openapi';
 
 export async function handleRequest(request: Request, env: Env, service: ProjectService): Promise<Response> {
   const url = new URL(request.url);

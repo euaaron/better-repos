@@ -1,10 +1,10 @@
-export const OPENAPI_SPEC = {
+export const openApiSpec = {
   openapi: '3.0.0',
   info: {
     title: 'Better Repos',
     version: '1.0.0',
     description:
-      'A Cloudflare Worker that exposes a GitHub profile’s repositories with metadata, tags, README content, and related project suggestions.',
+      'A Cloudflare Worker that exposes a GitHub profile’s repositories with related project suggestions.',
   },
   servers: [{ url: '/', description: 'Current Cloudflare Worker' }],
   components: {
