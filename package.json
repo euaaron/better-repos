@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "wrangler dev --port 8787",
     "deploy": "wrangler deploy",
+    "test": "tsx --test \"src/**/*.test.ts\"",
+    "test:coverage": "tsx --test \"src/**/*.test.ts\" --coverage",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

@@ -8,7 +8,8 @@
     "noEmit": true,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
-    "types": ["@cloudflare/workers-types"]
+    "skipLibCheck": true,
+    "types": ["node", "@cloudflare/workers-types"]
   },
   "include": ["src/**/*.ts"],
   "exclude": ["src/**/*.spec.ts"]
