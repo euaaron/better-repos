@@ -24,6 +24,8 @@ This is especially useful when you want to:
 ## API endpoints
 
 - `GET /` → Swagger UI documentation page
+- `GET /health` → simple health status for monitoring
+- `GET /info` → API metadata including build, environment, and runtime details
 - `GET /repos` → list repositories
 - `GET /repos/<repo_name>` → return a single repository by name or URL fragment
 - `GET /openapi.json` → OpenAPI schema
@@ -87,8 +89,22 @@ npm run dev
 The application will be available at:
 
 - http://127.0.0.1:8787/
+- http://127.0.0.1:8787/health
+- http://127.0.0.1:8787/info
 - http://127.0.0.1:8787/repos
 - http://127.0.0.1:8787/repos/<repo_name>
+
+### Health check example
+
+```bash
+curl http://127.0.0.1:8787/health
+```
+
+### Info example
+
+```bash
+curl http://127.0.0.1:8787/info
+```
 
 ### Example request: cURL
 
