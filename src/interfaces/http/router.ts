@@ -6,7 +6,7 @@ import { handleRepoRoute, handleReposRoute } from './routes/repos';
 import { handleHealthRoute } from './routes/health';
 import { handleInfoRoute } from './routes/info';
 import { handleRootRoute } from './routes/root';
-import { openApiSpec } from './openapi';
+import { createOpenApiSpec } from './openapi';
 
 export async function handleRequest(request: Request, env: Env, service: ProjectService): Promise<Response> {
   const url = new URL(request.url);
@@ -36,7 +36,7 @@ export async function handleRequest(request: Request, env: Env, service: Project
   }
 
   if (url.pathname === '/openapi.json') {
-    return new Response(JSON.stringify(openApiSpec, null, 2), {
+    return new Response(JSON.stringify(createOpenApiSpec(request.url), null, 2), {
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
         ...Object.fromEntries(buildCorsHeaders(origin, env).entries()),
