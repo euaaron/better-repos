@@ -1,65 +1,131 @@
-# Better Repos
+# **Better** Repos
 
-Better Repos is a Cloudflare Worker that exposes <GITHUB_USERNAME>'s GitHub repositories.
+**Better** `Repos` is a Cloudflare Worker that exposes a GitHub profile's public repositories in a clean, portfolio-friendly API format.
 
-## Why setting up this Worker instead of just getting repositories directly from GitHub API?
+It gathers repository metadata such as name, description, homepage, language, README content, tags, and project similarity signals, making it easier to build developer portfolios, project showcases, or internal catalog tools.
 
-The API provides a list of public GitHub repositories with metadata such as name, description, tags, README, homepage, and language, and allows you to match repositories by similarity based on tags and language.
+This is especially useful when you want to:
 
-For example, Imagine you have a repository with the backend of an application and another repo with the frontend, with this API, when listing your backend (or frontend) the other repo will be provided in the json inside a `similarTo` entry, allowing you to display it in your portfolio website, improving the UX for a visitor to know your projects.
+- showcase repositories in a portfolio website
+- enrich repository data with README content and tags
+- surface related projects based on similarities in language and topic
+- keep a lightweight and secure API layer in front of GitHub
 
-## API routes
+## Features
 
-- GET / → Swagger UI (documentation) page
-- GET /repos → list all repositories
-- GET /repos?name=some-name → return a single project by name or URL fragment
-- GET /openapi.json → OpenAPI schema
+- repository listing from a GitHub profile
+- repository detail lookup by name or URL fragment
+- README extraction for richer UI content
+- similarity suggestions for related projects
+- CORS protection via configured allowed origins
+- pagination support for collection responses
+- OpenAPI documentation exposed through the root route
 
-## Configuration
+## API endpoints
 
-- Create an account at Cloudflare if you don't have one yet;
-- Clone this repository;
-- Create and fill up `.env` and `.dev.vars` with the environment variables;
-- Run `npm i` and `npm run dev` to try if it's working;
-- Deploy to Cloudflare and assign your desired domain name, or use the free worker domain it provides.
+- `GET /` → Swagger UI documentation page
+- `GET /repos` → list repositories
+- `GET /repos/<repo_name>` → return a single repository by name or URL fragment
+- `GET /openapi.json` → OpenAPI schema
 
-### Example environment
+## Pagination
 
-I left a `.env.example` and a `.dev.vars.example` file to help you setup yours.
+This API follows REST-friendly conventions for collection pagination by using response headers.
+
+Request headers:
+
+- `X-Page`: page number, starting at `1`
+- `X-Page-Size`: number of items per page; optional and defaults to `10`
+
+Response headers:
+
+- `X-Page`
+- `X-Page-Size`
+- `X-Total-Count`
+- `X-Total-Pages`
+
+Response body when pagination is used:
+
+- `content`: repositories in the current page
+- `page`: current page number
+- `pageSize`: page size used
+- `totalPages`: total number of pages
+- `totalRepositories`: total repository count
+
+If no pagination headers are provided, the API returns the full list of repositories.
+
+## Getting started
+
+1. Create an account at Cloudflare if you do not already have one.
+2. Clone this repository.
+3. Copy the example environment file and fill in the required values:
 
 ```bash
 cp .env.example .env
 ```
 
-The environment variables are:
+The following variables are required:
 
 - `GITHUB_USERNAME`: GitHub username used to fetch repositories
-- `GITHUB_TOKEN`: optional GitHub personal access token; strongly recommended to avoid rate limits
-- `ALLOWED_ORIGINS`: comma-separated list of allowed origins for CORS, for example `http://localhost:8787,https://yourdomain.com`
+- `GITHUB_TOKEN`: GitHub personal access token; strongly recommended to avoid rate limits
+- `ALLOWED_ORIGINS`: comma-separated CORS origins, for example `http://localhost:8787,https://yourdomain.com`
 
 For local Cloudflare development, you can also create a `.dev.vars` file with the same values.
 
-## Local development
+4. Install dependencies:
 
 ```bash
 npm install
+```
+
+5. Start the Worker locally:
+
+```bash
 npm run dev
 ```
 
-The API will be available at:
+The application will be available at:
 
 - http://127.0.0.1:8787/
 - http://127.0.0.1:8787/repos
+- http://127.0.0.1:8787/repos/<repo_name>
+
+### Example request: cURL
+
+```bash
+curl -H "X-Page: 1" -H "X-Page-Size: 10" http://127.0.0.1:8787/repos
+```
+
+### Example request: fetch
+
+```javascript
+const response = await fetch('http://127.0.0.1:8787/repos', {
+  method: 'GET',
+  headers: {
+    'X-Page': '1',
+    'X-Page-Size': '10',
+  },
+});
+```
 
 ## Deployment
 
 ```bash
-npm install
 npx wrangler login
 npm run deploy
 ```
 
 ## Notes
 
-- Requests are allowed only from the origins configured in `ALLOWED_ORIGINS`.
-- GitHub API calls are cached briefly to reduce unnecessary network requests.
+- Requests are allowed only from origins configured in `ALLOWED_ORIGINS`.
+- GitHub API calls are cached briefly to reduce unnecessary network traffic.
+- The root route exposes Swagger UI and the OpenAPI document for easier inspection and testing.
+
+## Author
+
+<a href="https://github.com/euaaron">
+  <figure align="center">
+    <img src="https://github.com/euaaron.png" width="20%" />
+    <figcaption>Aaron Carneiro</figcaption>
+  </figure>
+</a>
