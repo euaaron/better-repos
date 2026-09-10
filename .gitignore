@@ -1,7 +1,10 @@
-# Paths to ignore
-node_modules/
-coverage/
-api/
+# Node.js
+node_modules
 
-# Files to ignore
+# Cloudflare specific or content generated via CI/CD
+wrangler.toml.local
+.wrangler
+
+# Secrets
+.dev.vars
 .env

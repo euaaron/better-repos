@@ -1,33 +1,13 @@
-import cors from 'cors';
-import { Express } from 'express';
-import 'express-async-errors';
-import 'reflect-metadata';
-import { Server } from './server';
-import { Config } from './shared/configs/env';
+import { getGitHubToken, getGithubUsername, type Env } from './config';
+import { ProjectService } from './application/ProjectService';
+import { GitHubProjectRepository } from './infrastructure/GitHubProjectRepository';
+import { handleRequest } from './interfaces/http/router';
 
-const server = new Server();
-const api: Express = server.load();
-
-const { PORT, HOST } = Config;
-
-api.use(
-  cors({
-    origin: '*',
-    methods: ['GET', 'POST'],
-    allowedHeaders: [
-      'Content-Type',      
-      'Authorization',
-      'Origin',
-      'X-Requested-With',
-      'Accept',
-      'Access-Control-Allow-Origin',
-    ],
-    credentials: false,
-  }),
-);
-
-api.listen(PORT, () => {
-  console.log(`Server running at ${HOST}:${PORT}/`);
-});
-
-export default api;
+export default {
+  async fetch(request: Request, env: Env): Promise<Response> {
+    const username = getGithubUsername(env);
+    const token = getGitHubToken(env);
+    const service = new ProjectService(new GitHubProjectRepository(username, token));
+    return handleRequest(request, env, service);
+  },
+};
