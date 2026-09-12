@@ -108,15 +108,17 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Deploy to Cloudflare Workers
+      - name: Sync Cloudflare Worker secrets
         run: |
           printf '%s' "$GH_USERNAME" | npx wrangler secret put GH_USERNAME --name "$APP_NAME"
           printf '%s' "$GH_TOKEN" | npx wrangler secret put GH_TOKEN --name "$APP_NAME"
+
+      - name: Deploy to Cloudflare Workers
+        run: |
           npx wrangler deploy \
             --var APP_NAME="$APP_NAME" \
             --var APP_VERSION="$APP_VERSION" \
             --var BUILD_COMMIT="$BUILD_COMMIT" \
             --var BUILD_DATE="$BUILD_DATE" \
             --var APP_ENV="$APP_ENV" \
-            --var ALLOWED_ORIGINS="$ALLOWED_ORIGINS" \
-            --var GH_USERNAME="$GH_USERNAME"
+            --var ALLOWED_ORIGINS="$ALLOWED_ORIGINS"

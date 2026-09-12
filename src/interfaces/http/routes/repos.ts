@@ -1,16 +1,28 @@
 import { ProjectService } from '../../../application/ProjectService';
-import type { Env } from '../../../config';
+import { GitHubProjectRepository } from '../../../infrastructure/GitHubProjectRepository';
+import { getGitHubToken, getGithubUsername, type Env } from '../../../config';
 import { buildJsonHeaders } from '../cors';
 import { jsonErrorResponse } from '../errors';
 import { buildPaginationHeaders, getPaginationConfig, paginateRepositories } from '../pagination';
 
-export async function handleReposRoute(request: Request, env: Env, service: ProjectService): Promise<Response> {
+function resolveProjectService(env: Env, service?: ProjectService): ProjectService {
+  if (service) {
+    return service;
+  }
+
+  const username = getGithubUsername(env);
+  const token = getGitHubToken(env);
+  return new ProjectService(new GitHubProjectRepository(username, token));
+}
+
+export async function handleReposRoute(request: Request, env: Env, service?: ProjectService): Promise<Response> {
   const origin = request.headers.get('Origin');
   const url = new URL(request.url);
 
   try {
+    const projectService = resolveProjectService(env, service);
     const { page, pageSize, isPaginatedRequest } = getPaginationConfig(request, url);
-    const repositories = await service.getAll();
+    const repositories = await projectService.getAll();
     const responseHeaders = buildJsonHeaders(origin, env);
 
     if (!isPaginatedRequest) {
@@ -45,15 +57,16 @@ export async function handleReposRoute(request: Request, env: Env, service: Proj
 export async function handleRepoRoute(
   request: Request,
   env: Env,
-  service: ProjectService,
+  service?: ProjectService,
   routeBasePath = '/repos',
 ): Promise<Response> {
   const origin = request.headers.get('Origin');
   const url = new URL(request.url);
 
   try {
+    const projectService = resolveProjectService(env, service);
     const repoName = url.pathname.replace(`${routeBasePath}/`, '').trim();
-    const repositories = await service.getAll();
+    const repositories = await projectService.getAll();
     const project = repositories.find(
       (item) =>
         item.name.toLowerCase() === repoName.toLowerCase() ||

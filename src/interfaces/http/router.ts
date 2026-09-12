@@ -1,14 +1,14 @@
 import { ProjectService } from '../../application/ProjectService';
 import type { Env } from '../../config';
 import { jsonErrorResponse } from './errors';
-import { buildCorsHeaders, buildJsonHeaders } from './cors';
+import { buildCorsHeaders } from './cors';
 import { handleRepoRoute, handleReposRoute } from './routes/repos';
 import { handleHealthRoute } from './routes/health';
 import { handleInfoRoute } from './routes/info';
 import { handleRootRoute } from './routes/root';
 import { createOpenApiSpec } from './openapi';
 
-export async function handleRequest(request: Request, env: Env, service: ProjectService): Promise<Response> {
+export async function handleRequest(request: Request, env: Env, service?: ProjectService): Promise<Response> {
   const url = new URL(request.url);
   const origin = request.headers.get('Origin');
 
