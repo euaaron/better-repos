@@ -10,6 +10,7 @@ jobs:
   prepare:
     name: Prepare
     runs-on: ubuntu-latest
+    environment: production
     outputs:
       app_name: ${{ steps.meta.outputs.APP_NAME }}
       app_version: ${{ steps.meta.outputs.APP_VERSION }}
@@ -82,6 +83,7 @@ jobs:
       - prepare
       - build
     runs-on: ubuntu-latest
+    environment: production
     env:
       APP_NAME: ${{ needs.prepare.outputs.app_name }}
       APP_VERSION: ${{ needs.prepare.outputs.app_version }}
