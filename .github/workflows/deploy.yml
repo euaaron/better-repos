@@ -91,7 +91,7 @@ jobs:
       BUILD_DATE: ${{ needs.prepare.outputs.build_date }}
       APP_ENV: ${{ needs.prepare.outputs.app_env }}
       ALLOWED_ORIGINS: ${{ needs.prepare.outputs.allowed_origins }}
-      GH_USERNAME: ${{ secrets.GH_USERNAME }}
+      GH_USERNAME: ${{ vars.GH_USERNAME }}
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
