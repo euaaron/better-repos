@@ -30,7 +30,7 @@ test('info route returns application metadata', async () => {
   assert.equal(payload.build.commit, 'abc123');
 });
 
-test('info route falls back to package metadata when build env vars are missing', async () => {
+test('info route falls back to generated package metadata when build env vars are missing', async () => {
   const response = handleInfoRoute(new Request('http://localhost:8787/info'), {});
 
   assert.equal(response.status, 200);
@@ -42,6 +42,6 @@ test('info route falls back to package metadata when build env vars are missing'
 
   assert.equal(payload.name, 'better-repos');
   assert.equal(payload.version, '2.0.0');
-  assert.equal(payload.build.commit, 'unknown');
+  assert.match(payload.build.commit, /^[a-f0-9]{40}$/i);
   assert.match(payload.build.date, /^\d{4}-\d{2}-\d{2}T/);
 });

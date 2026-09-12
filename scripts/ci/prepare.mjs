@@ -8,13 +8,10 @@ const projectRoot = path.resolve(currentDir, '..', '..');
 
 const packageJson = JSON.parse(readFileSync(path.join(projectRoot, 'package.json'), 'utf8'));
 
-const requiredEnv = ['GH_USERNAME', 'GH_TOKEN', 'CLOUDFLARE_API_TOKEN', 'CLOUDFLARE_ACCOUNT_ID'];
+const shouldWriteEnvFile = process.argv.includes('--write');
 
-for (const key of requiredEnv) {
-  if (!process.env[key] || !process.env[key].trim()) {
-    throw new Error(`Missing required environment variable: ${key}`);
-  }
-}
+// The generated file only contains build metadata and non-sensitive runtime defaults.
+// Deployment secrets are supplied only at deploy time and should not block local or CI validation runs.
 
 const getGitCommand = (command) => {
   try {
@@ -54,7 +51,7 @@ const output = [
 
 const environmentFile = `// This file was generated automatically at ${formatGeneratedAt()}\nexport const env = {\n  APP_NAME: ${JSON.stringify(appName)},\n  APP_VERSION: ${JSON.stringify(appVersion)},\n  BUILD_COMMIT: ${JSON.stringify(buildCommit)},\n  BUILD_DATE: ${JSON.stringify(buildDate)},\n  APP_ENV: ${JSON.stringify(appEnv)},\n  ALLOWED_ORIGINS: ${JSON.stringify(allowedOrigins)},\n  GH_USERNAME: ${JSON.stringify(githubUsername)},\n} as const;\n\nexport default env;\n`;
 
-if (process.env.WRITE_ENV_FILE === '1') {
+if (shouldWriteEnvFile) {
   writeFileSync(path.join(projectRoot, 'src', 'env.ts'), environmentFile, 'utf8');
   process.stdout.write(environmentFile);
   process.exit(0);

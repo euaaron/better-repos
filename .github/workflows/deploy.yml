@@ -33,17 +33,14 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Validate required CI variables
+      - name: Generate build metadata
         id: meta
         env:
           GH_USERNAME: ${{ vars.GH_USERNAME }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           APP_ENV: ${{ vars.APP_ENV }}
           ALLOWED_ORIGINS: ${{ vars.ALLOWED_ORIGINS }}
         run: |
-          WRITE_ENV_FILE=1 node scripts/ci/prepare.mjs > src/env.ts
+          node scripts/ci/prepare.mjs --write
           node scripts/ci/prepare.mjs > ci.env
           while IFS='=' read -r key value; do
             echo "${key}=${value}" >> "$GITHUB_OUTPUT"
@@ -60,6 +57,7 @@ jobs:
       BUILD_DATE: ${{ needs.prepare.outputs.build_date }}
       APP_ENV: ${{ needs.prepare.outputs.app_env }}
       ALLOWED_ORIGINS: ${{ needs.prepare.outputs.allowed_origins }}
+      GH_USERNAME: ${{ vars.GH_USERNAME }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4

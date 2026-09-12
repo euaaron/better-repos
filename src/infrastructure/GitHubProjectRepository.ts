@@ -97,7 +97,7 @@ export class GitHubProjectRepository {
     const repositories = await this.fetchRepositories();
 
     return repositories
-      .map((repository) => ({
+      .map((repository): Project => ({
         origin: 'github',
         owner: repository.owner.login,
         name: repository.name,

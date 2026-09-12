@@ -38,8 +38,8 @@ export function getAllowedOrigins(env: Env): string[] {
 
   return rawValue
     .split(',')
-    .map((origin) => origin.trim())
-    .filter((origin) => origin.length > 0);
+    .map((origin: string) => origin.trim())
+    .filter((origin: string) => origin.length > 0);
 }
 
 export function getAppName(env: Env): string {
