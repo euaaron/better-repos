@@ -115,7 +115,7 @@ jobs:
 
       - name: Generate Worker env config
         run: |
-          WRITE_ENV_FILE=1 APP_NAME="$APP_NAME" APP_VERSION="$APP_VERSION" BUILD_COMMIT="$BUILD_COMMIT" BUILD_DATE="$BUILD_DATE" APP_ENV="$APP_ENV" ALLOWED_ORIGINS="$ALLOWED_ORIGINS" GH_USERNAME="$GH_USERNAME" node scripts/ci/prepare.mjs > src/env.ts
+          APP_NAME="$APP_NAME" APP_VERSION="$APP_VERSION" BUILD_COMMIT="$BUILD_COMMIT" BUILD_DATE="$BUILD_DATE" APP_ENV="$APP_ENV" ALLOWED_ORIGINS="$ALLOWED_ORIGINS" GH_USERNAME="$GH_USERNAME" node scripts/ci/prepare.mjs --write
 
       - name: Deploy to Cloudflare Workers
         run: |
