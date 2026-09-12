@@ -43,6 +43,7 @@ jobs:
           APP_ENV: ${{ vars.APP_ENV }}
           ALLOWED_ORIGINS: ${{ vars.ALLOWED_ORIGINS }}
         run: |
+          WRITE_ENV_FILE=1 node scripts/ci/prepare.mjs > src/env.ts
           node scripts/ci/prepare.mjs > ci.env
           while IFS='=' read -r key value; do
             echo "${key}=${value}" >> "$GITHUB_OUTPUT"
@@ -74,6 +75,7 @@ jobs:
 
       - name: Run build validation
         run: |
+          npm run prepare:env
           npm run typecheck
           node -e "console.log('Build ready for', process.env.APP_NAME, process.env.APP_VERSION, process.env.BUILD_COMMIT)"
 
@@ -113,6 +115,10 @@ jobs:
           printf '%s' "$GH_USERNAME" | npx wrangler secret put GH_USERNAME --name "$APP_NAME"
           printf '%s' "$GH_TOKEN" | npx wrangler secret put GH_TOKEN --name "$APP_NAME"
 
+      - name: Generate Worker env config
+        run: |
+          WRITE_ENV_FILE=1 APP_NAME="$APP_NAME" APP_VERSION="$APP_VERSION" BUILD_COMMIT="$BUILD_COMMIT" BUILD_DATE="$BUILD_DATE" APP_ENV="$APP_ENV" ALLOWED_ORIGINS="$ALLOWED_ORIGINS" GH_USERNAME="$GH_USERNAME" node scripts/ci/prepare.mjs > src/env.ts
+
       - name: Deploy to Cloudflare Workers
         run: |
           npx wrangler deploy \
@@ -121,4 +127,5 @@ jobs:
             --var BUILD_COMMIT="$BUILD_COMMIT" \
             --var BUILD_DATE="$BUILD_DATE" \
             --var APP_ENV="$APP_ENV" \
-            --var ALLOWED_ORIGINS="$ALLOWED_ORIGINS"
+            --var ALLOWED_ORIGINS="$ALLOWED_ORIGINS" \
+            --var GH_USERNAME="$GH_USERNAME"

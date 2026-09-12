@@ -11,3 +11,4 @@ wrangler.toml.local
 # Secrets
 .dev.vars
 .env
+src/env.ts

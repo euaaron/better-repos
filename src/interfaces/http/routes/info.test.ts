@@ -30,11 +30,18 @@ test('info route returns application metadata', async () => {
   assert.equal(payload.build.commit, 'abc123');
 });
 
-test('info route returns config error if required metadata is missing', async () => {
+test('info route falls back to package metadata when build env vars are missing', async () => {
   const response = handleInfoRoute(new Request('http://localhost:8787/info'), {});
 
-  assert.equal(response.status, 500);
-  const payload = (await response.json()) as { error: { code: string; message: string } };
-  assert.equal(payload.error.code, 'CONFIG_ERROR');
-  assert.match(payload.error.message, /APP_NAME is required/i);
+  assert.equal(response.status, 200);
+  const payload = (await response.json()) as {
+    name: string;
+    version: string;
+    build: { commit: string; date: string };
+  };
+
+  assert.equal(payload.name, 'better-repos');
+  assert.equal(payload.version, '2.0.0');
+  assert.equal(payload.build.commit, 'unknown');
+  assert.match(payload.build.date, /^\d{4}-\d{2}-\d{2}T/);
 });

@@ -43,7 +43,7 @@ test('getAllowedOrigins parses comma separated origins', () => {
   ]);
 });
 
-test('getAppName and app metadata accessors validate required values', () => {
+test('getAppName and app metadata accessors use package defaults when env values are absent', () => {
   const env = {
     APP_NAME: 'better-repos',
     APP_VERSION: '2.0.0',
@@ -58,11 +58,8 @@ test('getAppName and app metadata accessors validate required values', () => {
   assert.equal(getBuildDate(env), '2026-09-10T00:00:00.000Z');
   assert.equal(getAppEnvironment(env), 'production');
   assert.equal(getAppEnvironment({}), 'development');
-});
-
-test('metadata getters throw when a required variable is missing', () => {
-  assert.throws(() => getAppName({}), /APP_NAME is required/i);
-  assert.throws(() => getAppVersion({}), /APP_VERSION is required/i);
-  assert.throws(() => getBuildCommit({}), /BUILD_COMMIT is required/i);
-  assert.throws(() => getBuildDate({}), /BUILD_DATE is required/i);
+  assert.equal(getAppName({}), 'better-repos');
+  assert.equal(getAppVersion({}), '2.0.0');
+  assert.match(getBuildCommit({}), /^([a-f0-9]{7,40}|unknown)$/i);
+  assert.match(getBuildDate({}), /^\d{4}-\d{2}-\d{2}T/);
 });

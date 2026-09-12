@@ -26,13 +26,22 @@ export class ProjectService {
       return null;
     }
 
+    const repositoryMethod = this.repository.getProjectByName?.bind(this.repository);
+    const directProject = repositoryMethod ? await repositoryMethod(normalizedName) : null;
+
+    if (directProject) {
+      const projects = await this.getAll();
+      const similarTo = this.findSimilarProjects(directProject, projects);
+      return { ...directProject, similarTo };
+    }
+
     const projects = await this.getAll();
     return (
       projects.find(
-        (project) =>
-          project.name.toLowerCase() === normalizedName ||
-          project.fullName.toLowerCase().includes(normalizedName) ||
-          project.url.toLowerCase().includes(normalizedName),
+        (item) =>
+          item.name.toLowerCase() === normalizedName ||
+          item.fullName.toLowerCase().includes(normalizedName) ||
+          item.url.toLowerCase().includes(normalizedName),
       ) ?? null
     );
   }

@@ -66,12 +66,15 @@ export async function handleRepoRoute(
   try {
     const projectService = resolveProjectService(env, service);
     const repoName = url.pathname.replace(`${routeBasePath}/`, '').trim();
-    const repositories = await projectService.getAll();
-    const project = repositories.find(
-      (item) =>
-        item.name.toLowerCase() === repoName.toLowerCase() ||
-        item.url.toLowerCase().includes(repoName.toLowerCase()),
-    );
+
+    const project =
+      typeof projectService.getByName === 'function'
+        ? await projectService.getByName(repoName)
+        : (await projectService.getAll()).find(
+            (item) =>
+              item.name.toLowerCase() === repoName.toLowerCase() ||
+              item.url.toLowerCase().includes(repoName.toLowerCase()),
+          ) ?? null;
 
     if (!project) {
       return jsonErrorResponse(404, 'NOT_FOUND', 'Repository not found');

@@ -1,3 +1,6 @@
+import packageJson from '../package.json' with { type: 'json' };
+import generatedEnv from './env';
+
 export type Env = {
   GH_USERNAME?: string;
   GH_TOKEN?: string;
@@ -8,6 +11,12 @@ export type Env = {
   BUILD_DATE?: string;
   APP_ENV?: string;
 };
+
+const DEFAULT_APP_NAME = (generatedEnv.APP_NAME || packageJson.name || 'better-repos').trim();
+const DEFAULT_APP_VERSION = (generatedEnv.APP_VERSION || packageJson.version || '0.0.0').trim();
+const DEFAULT_BUILD_COMMIT = (generatedEnv.BUILD_COMMIT || 'unknown').trim();
+const DEFAULT_BUILD_DATE = (generatedEnv.BUILD_DATE || new Date(0).toISOString()).trim();
+const DEFAULT_ALLOWED_ORIGINS = generatedEnv.ALLOWED_ORIGINS || 'http://localhost:8787,http://127.0.0.1:8787';
 
 export function getGithubUsername(env: Env): string {
   const username = env.GH_USERNAME?.trim();
@@ -25,11 +34,7 @@ export function getGitHubToken(env: Env): string | undefined {
 }
 
 export function getAllowedOrigins(env: Env): string[] {
-  const rawValue = env.ALLOWED_ORIGINS?.trim();
-
-  if (!rawValue) {
-    return ['http://localhost:8787', 'http://127.0.0.1:8787'];
-  }
+  const rawValue = env.ALLOWED_ORIGINS?.trim() || generatedEnv.ALLOWED_ORIGINS?.trim() || DEFAULT_ALLOWED_ORIGINS;
 
   return rawValue
     .split(',')
@@ -38,45 +43,21 @@ export function getAllowedOrigins(env: Env): string[] {
 }
 
 export function getAppName(env: Env): string {
-  const appName = env.APP_NAME?.trim();
-
-  if (!appName) {
-    throw new Error('APP_NAME is required. Set it in your environment or GitHub Actions variables.');
-  }
-
-  return appName;
+  return env.APP_NAME?.trim() || generatedEnv.APP_NAME?.trim() || DEFAULT_APP_NAME;
 }
 
 export function getAppVersion(env: Env): string {
-  const appVersion = env.APP_VERSION?.trim();
-
-  if (!appVersion) {
-    throw new Error('APP_VERSION is required. Set it in your environment or GitHub Actions variables.');
-  }
-
-  return appVersion;
+  return env.APP_VERSION?.trim() || generatedEnv.APP_VERSION?.trim() || DEFAULT_APP_VERSION;
 }
 
 export function getBuildCommit(env: Env): string {
-  const buildCommit = env.BUILD_COMMIT?.trim();
-
-  if (!buildCommit) {
-    throw new Error('BUILD_COMMIT is required. Set it in your environment or GitHub Actions variables.');
-  }
-
-  return buildCommit;
+  return env.BUILD_COMMIT?.trim() || generatedEnv.BUILD_COMMIT?.trim() || DEFAULT_BUILD_COMMIT;
 }
 
 export function getBuildDate(env: Env): string {
-  const buildDate = env.BUILD_DATE?.trim();
-
-  if (!buildDate) {
-    throw new Error('BUILD_DATE is required. Set it in your environment or GitHub Actions variables.');
-  }
-
-  return buildDate;
+  return env.BUILD_DATE?.trim() || generatedEnv.BUILD_DATE?.trim() || DEFAULT_BUILD_DATE;
 }
 
 export function getAppEnvironment(env: Env): string {
-  return env.APP_ENV?.trim() || 'development';
+  return env.APP_ENV?.trim() || generatedEnv.APP_ENV?.trim() || 'development';
 }
