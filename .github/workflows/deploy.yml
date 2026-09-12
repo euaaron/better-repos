@@ -35,8 +35,8 @@ jobs:
       - name: Validate required CI variables
         id: meta
         env:
-          GITHUB_USERNAME: ${{ secrets.GITHUB_USERNAME }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_USERNAME: ${{ secrets.GH_USERNAME }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           APP_ENV: ${{ vars.APP_ENV }}
@@ -89,8 +89,8 @@ jobs:
       BUILD_DATE: ${{ needs.prepare.outputs.build_date }}
       APP_ENV: ${{ needs.prepare.outputs.app_env }}
       ALLOWED_ORIGINS: ${{ needs.prepare.outputs.allowed_origins }}
-      GITHUB_USERNAME: ${{ secrets.GITHUB_USERNAME }}
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_USERNAME: ${{ secrets.GH_USERNAME }}
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
@@ -108,8 +108,8 @@ jobs:
 
       - name: Deploy to Cloudflare Workers
         run: |
-          printf '%s' "$GITHUB_USERNAME" | npx wrangler secret put GITHUB_USERNAME --name "$APP_NAME"
-          printf '%s' "$GITHUB_TOKEN" | npx wrangler secret put GITHUB_TOKEN --name "$APP_NAME"
+          printf '%s' "$GH_USERNAME" | npx wrangler secret put GH_USERNAME --name "$APP_NAME"
+          printf '%s' "$GH_TOKEN" | npx wrangler secret put GH_TOKEN --name "$APP_NAME"
           npx wrangler deploy \
             --var APP_NAME="$APP_NAME" \
             --var APP_VERSION="$APP_VERSION" \
@@ -117,4 +117,4 @@ jobs:
             --var BUILD_DATE="$BUILD_DATE" \
             --var APP_ENV="$APP_ENV" \
             --var ALLOWED_ORIGINS="$ALLOWED_ORIGINS" \
-            --var GITHUB_USERNAME="$GITHUB_USERNAME"
+            --var GH_USERNAME="$GH_USERNAME"

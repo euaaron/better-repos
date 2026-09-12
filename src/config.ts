@@ -1,6 +1,6 @@
 export type Env = {
-  GITHUB_USERNAME?: string;
-  GITHUB_TOKEN?: string;
+  GH_USERNAME?: string;
+  GH_TOKEN?: string;
   ALLOWED_ORIGINS?: string;
   APP_NAME?: string;
   APP_VERSION?: string;
@@ -10,17 +10,17 @@ export type Env = {
 };
 
 export function getGithubUsername(env: Env): string {
-  const username = env.GITHUB_USERNAME?.trim();
+  const username = env.GH_USERNAME?.trim();
 
   if (!username) {
-    throw new Error('GITHUB_USERNAME is required. Set it in your environment or GitHub Actions secrets.');
+    throw new Error('GH_USERNAME is required. Set it in your environment or GitHub Actions secrets.');
   }
 
   return username;
 }
 
 export function getGitHubToken(env: Env): string | undefined {
-  const token = env.GITHUB_TOKEN?.trim();
+  const token = env.GH_TOKEN?.trim();
   return token && token.length > 0 ? token : undefined;
 }
 

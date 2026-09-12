@@ -160,7 +160,7 @@ export function createOpenApiSpec(requestUrl?: string) {
                   example: {
                     error: {
                       code: 'UPSTREAM_ERROR',
-                      message: 'GitHub API rate limit exceeded. Add GITHUB_TOKEN with a GitHub personal access token to increase the request limit.',
+                      message: 'GitHub API rate limit exceeded. Add GH_TOKEN with a GitHub personal access token to increase the request limit.',
                       details: null,
                     },
                   },

@@ -8,7 +8,7 @@ const projectRoot = path.resolve(currentDir, '..', '..');
 
 const packageJson = JSON.parse(readFileSync(path.join(projectRoot, 'package.json'), 'utf8'));
 
-const requiredEnv = ['GITHUB_USERNAME', 'GITHUB_TOKEN', 'CLOUDFLARE_API_TOKEN', 'CLOUDFLARE_ACCOUNT_ID'];
+const requiredEnv = ['GH_USERNAME', 'GH_TOKEN', 'CLOUDFLARE_API_TOKEN', 'CLOUDFLARE_ACCOUNT_ID'];
 
 for (const key of requiredEnv) {
   if (!process.env[key] || !process.env[key].trim()) {

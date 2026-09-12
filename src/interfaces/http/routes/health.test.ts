@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { handleHealthRoute } from './health';
 
 const validEnv = {
-  GITHUB_USERNAME: 'octocat',
+  GH_USERNAME: 'octocat',
   APP_NAME: 'better-repos',
   APP_VERSION: '2.0.0',
   BUILD_COMMIT: 'abc123',

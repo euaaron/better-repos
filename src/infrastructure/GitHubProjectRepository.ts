@@ -60,7 +60,7 @@ export class GitHubProjectRepository {
     if (!response.ok) {
       throw new Error(
         response.status === 403
-          ? 'GitHub API rate limit exceeded. Add GITHUB_TOKEN with a GitHub personal access token to increase the request limit.'
+          ? 'GitHub API rate limit exceeded. Add GH_TOKEN with a GitHub personal access token to increase the request limit.'
           : `GitHub request failed with status ${response.status}`,
       );
     }

@@ -13,20 +13,20 @@ import {
 } from './config';
 
 test('getGithubUsername returns the configured username', () => {
-  const username = getGithubUsername({ GITHUB_USERNAME: ' octocat ' });
+  const username = getGithubUsername({ GH_USERNAME: ' octocat ' });
   assert.equal(username, 'octocat');
 });
 
 test('getGithubUsername throws when the username is missing', () => {
   assert.throws(
     () => getGithubUsername({}),
-    /GITHUB_USERNAME is required/i,
+    /GH_USERNAME is required/i,
   );
 });
 
 test('getGitHubToken returns undefined for an empty token value', () => {
-  assert.equal(getGitHubToken({ GITHUB_TOKEN: '   ' }), undefined);
-  assert.equal(getGitHubToken({ GITHUB_TOKEN: 'token-123' }), 'token-123');
+  assert.equal(getGitHubToken({ GH_TOKEN: '   ' }), undefined);
+  assert.equal(getGitHubToken({ GH_TOKEN: 'token-123' }), 'token-123');
 });
 
 test('getAllowedOrigins returns localhost defaults when not configured', () => {

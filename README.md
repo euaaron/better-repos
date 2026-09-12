@@ -68,8 +68,8 @@ cp .env.example .env
 
 The following variables are required:
 
-- `GITHUB_USERNAME`: GitHub username used to fetch repositories
-- `GITHUB_TOKEN`: GitHub personal access token; strongly recommended to avoid rate limits
+- `GH_USERNAME`: GitHub username used to fetch repositories
+- `GH_TOKEN`: GitHub personal access token; strongly recommended to avoid rate limits
 - `ALLOWED_ORIGINS`: comma-separated CORS origins, for example `http://localhost:8787,https://yourdomain.com`
 
 For local Cloudflare development, you can also create a `.dev.vars` file with the same values.
