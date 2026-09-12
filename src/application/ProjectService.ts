@@ -54,43 +54,99 @@ export class ProjectService {
   }
 
   private findSimilarProjects(project: Project, projects: Project[]): SimilarProject[] {
-    const similarProjects: SimilarProject[] = [];
-
-    for (const item of projects) {
-      if (item.name === project.name) {
-        continue;
-      }
-
-      if (item.tags && project.tags) {
-        const match = this.findMatchingTag(item.tags, project.tags);
-        if (match) {
-          similarProjects.push({ name: item.name, reason: match, url: item.url });
-          continue;
+    const scoredProjects = projects
+      .filter((item) => item.name !== project.name)
+      .map((item) => ({
+        item,
+        score: this.getSimilarityScore(project, item),
+        reason: this.getSimilarityReason(project, item),
+      }))
+      .filter((entry) => entry.reason !== null)
+      .sort((left, right) => {
+        if (right.score !== left.score) {
+          return right.score - left.score;
         }
-      }
 
-      if (item.language && item.language === project.language) {
-        similarProjects.push({ name: item.name, reason: item.language, url: item.url });
-        continue;
-      }
-
-      if (item.tags?.length && project.language) {
-        const tagMatch = this.findMatchingTag(item.tags, [project.language]);
-        if (tagMatch) {
-          similarProjects.push({ name: item.name, reason: tagMatch, url: item.url });
-          continue;
+        if (left.item.name.startsWith(project.name) !== right.item.name.startsWith(project.name)) {
+          return left.item.name.startsWith(project.name) ? -1 : 1;
         }
-      }
 
-      if (project.tags?.length && item.language) {
-        const tagMatch = this.findMatchingTag(project.tags, [item.language]);
-        if (tagMatch) {
-          similarProjects.push({ name: item.name, reason: tagMatch, url: item.url });
-        }
+        return left.item.name.localeCompare(right.item.name);
+      })
+      .map(({ item, reason }) => ({
+        name: item.name,
+        reason: reason ?? item.language ?? 'related',
+        url: item.url,
+      }));
+
+    return scoredProjects;
+  }
+
+  private getSimilarityScore(project: Project, item: Project): number {
+    let score = 0;
+
+    const sharedTags = project.tags?.filter((tag) => item.tags?.includes(tag)) ?? [];
+    score += sharedTags.length * 10;
+
+    const nameSimilarity = this.getNameSimilarityScore(project.name, item.name);
+    score += nameSimilarity;
+
+    if (project.language && item.language && project.language === item.language) {
+      score += 1;
+    }
+
+    return score;
+  }
+
+  private getSimilarityReason(project: Project, item: Project): string | null {
+    const sharedTags = project.tags?.filter((tag) => item.tags?.includes(tag)) ?? [];
+    if (sharedTags.length > 0) {
+      return sharedTags[0];
+    }
+
+    const nameSimilarity = this.getNameSimilarityScore(project.name, item.name);
+    if (nameSimilarity > 0) {
+      return item.name;
+    }
+
+    if (project.language && item.language && project.language === item.language) {
+      return item.language;
+    }
+
+    if (item.tags?.length && project.language) {
+      const tagMatch = this.findMatchingTag(item.tags, [project.language]);
+      if (tagMatch) {
+        return tagMatch;
       }
     }
 
-    return similarProjects;
+    if (project.tags?.length && item.language) {
+      const tagMatch = this.findMatchingTag(project.tags, [item.language]);
+      if (tagMatch) {
+        return tagMatch;
+      }
+    }
+
+    return null;
+  }
+
+  private getNameSimilarityScore(leftName: string, rightName: string): number {
+    const normalizedLeft = leftName.toLowerCase();
+    const normalizedRight = rightName.toLowerCase();
+
+    if (normalizedLeft === normalizedRight) {
+      return 100;
+    }
+
+    if (normalizedLeft.includes(normalizedRight) || normalizedRight.includes(normalizedLeft)) {
+      return 90;
+    }
+
+    const leftParts = normalizedLeft.split(/[-_\s]+/);
+    const rightParts = normalizedRight.split(/[-_\s]+/);
+    const commonParts = leftParts.filter((part) => rightParts.includes(part));
+
+    return commonParts.length * 25;
   }
 
   private findMatchingTag(sourceTags: string[], compareTags: string[]): string | null {

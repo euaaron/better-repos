@@ -98,3 +98,88 @@ test('ProjectService enriches related projects with matching tags and languages'
   assert.ok(alpha?.similarTo?.some((item) => item.name === 'beta'));
   assert.ok(alpha?.similarTo?.some((item) => item.name === 'beta' && ['api', 'typescript'].includes(item.reason)));
 });
+
+test('ProjectService ranks similar projects by shared tags, then name similarity, then language', async () => {
+  const projects = [
+    {
+      origin: 'github',
+      owner: 'octocat',
+      name: 'gobarber',
+      fullName: 'octocat/gobarber',
+      description: 'Gobarber',
+      url: 'https://github.com/octocat/gobarber',
+      homepage: null,
+      language: 'typescript',
+      createdAt: '2024-01-01T00:00:00.000Z',
+      updatedAt: '2025-01-01T00:00:00.000Z',
+      readme: '# gobarber',
+      tags: ['api', 'node', 'postgres'],
+    },
+    {
+      origin: 'github',
+      owner: 'octocat',
+      name: 'gobarber-api',
+      fullName: 'octocat/gobarber-api',
+      description: 'API',
+      url: 'https://github.com/octocat/gobarber-api',
+      homepage: null,
+      language: 'typescript',
+      createdAt: '2024-02-01T00:00:00.000Z',
+      updatedAt: '2025-02-01T00:00:00.000Z',
+      readme: '# gobarber-api',
+      tags: ['api', 'node'],
+    },
+    {
+      origin: 'github',
+      owner: 'octocat',
+      name: 'gobarber-app',
+      fullName: 'octocat/gobarber-app',
+      description: 'App',
+      url: 'https://github.com/octocat/gobarber-app',
+      homepage: null,
+      language: 'react',
+      createdAt: '2024-02-01T00:00:00.000Z',
+      updatedAt: '2025-02-01T00:00:00.000Z',
+      readme: '# gobarber-app',
+      tags: ['react'],
+    },
+    {
+      origin: 'github',
+      owner: 'octocat',
+      name: 'api-tools',
+      fullName: 'octocat/api-tools',
+      description: 'Tools',
+      url: 'https://github.com/octocat/api-tools',
+      homepage: null,
+      language: 'java',
+      createdAt: '2024-03-01T00:00:00.000Z',
+      updatedAt: '2025-03-01T00:00:00.000Z',
+      readme: '# api-tools',
+      tags: ['api'],
+    },
+    {
+      origin: 'github',
+      owner: 'octocat',
+      name: 'portfolio',
+      fullName: 'octocat/portfolio',
+      description: 'Portfolio',
+      url: 'https://github.com/octocat/portfolio',
+      homepage: null,
+      language: 'typescript',
+      createdAt: '2024-04-01T00:00:00.000Z',
+      updatedAt: '2025-04-01T00:00:00.000Z',
+      readme: '# portfolio',
+      tags: ['design'],
+    },
+  ] as any;
+
+  const service = new ProjectService({ getProjects: async () => projects } as any, 60_000);
+  const result = await service.getAll();
+  const gobarber = result.find((project) => project.name === 'gobarber');
+
+  assert.ok(gobarber);
+  assert.deepEqual(
+    gobarber?.similarTo?.map((item) => item.name),
+    ['gobarber-api', 'gobarber-app', 'api-tools', 'portfolio'],
+  );
+});
