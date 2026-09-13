@@ -1,4 +1,5 @@
 import { spawnSync } from 'node:child_process';
+import { writeFileSync } from 'node:fs';
 
 const minimumCoverage = 70;
 const testProcess = spawnSync('npm', ['run', 'test:coverage'], {
@@ -24,6 +25,16 @@ if (!Number.isFinite(coverage)) {
 if (coverage < minimumCoverage) {
   console.error(`Line coverage is ${coverage}%, below the required ${minimumCoverage}%.`);
   process.exit(1);
+}
+
+const coverageBadgeFile = process.env.COVERAGE_BADGE_FILE;
+if (coverageBadgeFile) {
+  const color = coverage >= 90 ? 'brightgreen' : coverage >= minimumCoverage ? 'yellow' : 'red';
+  writeFileSync(
+    coverageBadgeFile,
+    `${JSON.stringify({ schemaVersion: 1, label: 'coverage', message: `${coverage}%`, color })}\n`,
+    'utf8',
+  );
 }
 
 console.log(`Line coverage is ${coverage}%, meeting the required ${minimumCoverage}%.`);

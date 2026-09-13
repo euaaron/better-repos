@@ -1,5 +1,9 @@
 # **Better** Repos
 
+[![Test coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/euaaron/better-repos/badges/.github/badges/coverage.json)](https://github.com/euaaron/better-repos/actions/workflows/deploy.yml)
+[![Deployment](https://img.shields.io/github/actions/workflow/status/euaaron/better-repos/deploy.yml?branch=main&job=deploy&label=deployment)](https://github.com/euaaron/better-repos/actions/workflows/deploy.yml)
+[![Version](https://img.shields.io/github/package-json/v/euaaron/better-repos?label=version)](https://github.com/euaaron/better-repos/blob/main/package.json)
+
 **Better** `Repos` is a Cloudflare Worker that exposes a GitHub profile's public repositories in a clean, portfolio-friendly API format.
 
 It gathers repository metadata such as name, description, homepage, language, README content, tags, and project similarity signals, making it easier to build developer portfolios, project showcases, or internal catalog tools.
@@ -32,12 +36,14 @@ This is especially useful when you want to:
 
 ## Pagination
 
-This API follows REST-friendly conventions for collection pagination by using response headers.
+This API follows REST-friendly conventions for collection pagination. You can provide pagination through request headers or query parameters.
 
 Request headers:
 
 - `X-Page`: page number, starting at `1`
 - `X-Page-Size`: number of items per page; optional and defaults to `10`
+
+Equivalent query parameters are `page` and `page_size`.
 
 Response headers:
 
@@ -60,19 +66,19 @@ If no pagination headers are provided, the API returns the full list of reposito
 
 1. Create an account at Cloudflare if you do not already have one.
 2. Clone this repository.
-3. Copy the example environment file and fill in the required values:
+3. Copy an environment example and fill in the values:
 
 ```bash
 cp .env.example .env
 ```
 
-The following variables are required:
+Configuration variables:
 
 - `GH_USERNAME`: GitHub username used to fetch repositories
-- `GH_TOKEN`: GitHub personal access token; strongly recommended to avoid rate limits
-- `ALLOWED_ORIGINS`: comma-separated CORS origins, for example `http://localhost:8787,https://yourdomain.com`
+- `GH_TOKEN`: optional GitHub personal access token; recommended to avoid rate limits
+- `ALLOWED_ORIGINS`: optional comma-separated CORS origins, for example `http://localhost:8787,https://yourdomain.com`
 
-For local Cloudflare development, you can also create a `.dev.vars` file with the same values.
+`GH_USERNAME` is required. `ALLOWED_ORIGINS` defaults to the two local development URLs when omitted. For local Cloudflare development, you can use `.dev.vars` or `.dev.vars.example` instead of `.env`.
 
 4. Install dependencies:
 
