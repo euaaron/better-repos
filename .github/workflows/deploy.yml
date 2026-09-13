@@ -124,7 +124,7 @@ jobs:
       APP_VERSION: ${{ needs.prepare.outputs.app_version }}
       BUILD_COMMIT: ${{ needs.prepare.outputs.build_commit }}
       BUILD_DATE: ${{ needs.prepare.outputs.build_date }}
-      APP_ENV: ${{ needs.prepare.outputs.app_env }}
+      APP_ENV: ${{ github.event_name == 'pull_request' && 'preview' || needs.prepare.outputs.app_env }}
       ALLOWED_ORIGINS: ${{ needs.prepare.outputs.allowed_origins }}
       GH_USERNAME: ${{ vars.GH_USERNAME }}
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
