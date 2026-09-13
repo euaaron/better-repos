@@ -21,7 +21,6 @@ export function handleInfoRoute(request: Request, env: Env): Response {
         date: getBuildDate(env),
       },
       environment: getAppEnvironment(env),
-      nodeVersion: typeof process !== 'undefined' ? process.version : 'not-available',
     };
 
     return new Response(JSON.stringify(info), {

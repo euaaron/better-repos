@@ -74,8 +74,7 @@ export function createOpenApiSpec(requestUrl?: string) {
                       commit: 'abc123',
                       date: '2026-09-10T12:00:00.000Z',
                     },
-                    environment: 'development',
-                    nodeVersion: 'v22.0.0',
+                    environment: 'development'
                   },
                 },
               },
