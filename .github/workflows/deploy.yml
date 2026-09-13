@@ -7,8 +7,32 @@ on:
   workflow_dispatch:
 
 jobs:
+  validate:
+    name: Validate pull request
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests and coverage validation
+        run: |
+          npm run prepare:env
+          npm run typecheck
+          npm run test:coverage:check
+
   prepare:
     name: Prepare
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     environment: production
     outputs:
@@ -48,6 +72,7 @@ jobs:
 
   build:
     name: Build
+    if: github.event_name != 'pull_request'
     needs: prepare
     runs-on: ubuntu-latest
     env:
@@ -79,6 +104,7 @@ jobs:
 
   deploy:
     name: Deploy
+    if: github.event_name != 'pull_request'
     needs:
       - prepare
       - build
