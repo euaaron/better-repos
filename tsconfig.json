@@ -1,33 +1,16 @@
 {
-  "buildOptions": {
-    "verbose": true
-  },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.json",
-    "docs"
-  ],
-  "exclude": [
-    "node_modules/",
-    "api/",
-    "src/**/*.spec.ts",
-  ],
   "compilerOptions": {
-    "target": "es5",
-    "module": "commonjs",
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "strict": true,
-    "outDir": "api",
+    "noEmit": true,
     "resolveJsonModule": true,
-    "forceConsistentCasingInFileNames": true,
-    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
-    "sourceMap": true,
-    "allowJs": true,
-    "experimentalDecorators": true,
-    "baseUrl": "./",
-    "typeRoots": [
-      "node_modules/@types",
-      "@types"
-    ],
-  }
+    "types": ["node", "@cloudflare/workers-types"]
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/*.spec.ts"]
 }

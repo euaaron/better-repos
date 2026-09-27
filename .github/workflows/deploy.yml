@@ -1,0 +1,211 @@
+name: Better Repos CI/CD
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: Validate pull request
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests and coverage validation
+        run: |
+          npm run prepare:env
+          npm run typecheck
+          npm run test:coverage:check
+
+  coverage:
+    name: Publish coverage badge
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate coverage badge data
+        run: |
+          npm run prepare:env
+          COVERAGE_BADGE_FILE=coverage.json npm run test:coverage:check
+
+      - name: Publish coverage badge data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin badges:badges 2>/dev/null || true
+
+          if git show-ref --verify --quiet refs/remotes/origin/badges; then
+            git checkout -B badges origin/badges
+          else
+            git checkout --orphan badges
+            git rm -rf .
+          fi
+
+          mkdir -p .github/badges
+          mv coverage.json .github/badges/coverage.json
+          git add .github/badges/coverage.json
+          git diff --cached --quiet || git commit -m "chore: update coverage badge"
+          git push origin badges
+
+  prepare:
+    name: Prepare
+    if: >-
+      always() &&
+      (github.event_name != 'pull_request' || needs.validate.result == 'success')
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: production
+    outputs:
+      app_name: ${{ steps.meta.outputs.APP_NAME }}
+      app_version: ${{ steps.meta.outputs.APP_VERSION }}
+      build_commit: ${{ steps.meta.outputs.BUILD_COMMIT }}
+      build_date: ${{ steps.meta.outputs.BUILD_DATE }}
+      app_env: ${{ steps.meta.outputs.APP_ENV }}
+      allowed_origins: ${{ steps.meta.outputs.ALLOWED_ORIGINS }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Generate build metadata
+        id: meta
+        env:
+          GH_USERNAME: ${{ vars.GH_USERNAME }}
+          APP_ENV: ${{ vars.APP_ENV }}
+          ALLOWED_ORIGINS: ${{ vars.ALLOWED_ORIGINS }}
+        run: |
+          node scripts/ci/prepare.mjs --write
+          node scripts/ci/prepare.mjs > ci.env
+          while IFS='=' read -r key value; do
+            echo "${key}=${value}" >> "$GITHUB_OUTPUT"
+          done < ci.env
+
+  build:
+    name: Build
+    needs: prepare
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      APP_NAME: ${{ needs.prepare.outputs.app_name }}
+      APP_VERSION: ${{ needs.prepare.outputs.app_version }}
+      BUILD_COMMIT: ${{ needs.prepare.outputs.build_commit }}
+      BUILD_DATE: ${{ needs.prepare.outputs.build_date }}
+      APP_ENV: ${{ needs.prepare.outputs.app_env }}
+      ALLOWED_ORIGINS: ${{ needs.prepare.outputs.allowed_origins }}
+      GH_USERNAME: ${{ vars.GH_USERNAME }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run build validation
+        run: |
+          npm run prepare:env
+          npm run typecheck
+          node -e "console.log('Build ready for', process.env.APP_NAME, process.env.APP_VERSION, process.env.BUILD_COMMIT)"
+
+  deploy:
+    name: Deploy (${{ github.event_name == 'pull_request' && 'preview' || 'production' }})
+    needs:
+      - prepare
+      - build
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
+    environment: production
+    env:
+      APP_NAME: ${{ needs.prepare.outputs.app_name }}
+      APP_VERSION: ${{ needs.prepare.outputs.app_version }}
+      BUILD_COMMIT: ${{ needs.prepare.outputs.build_commit }}
+      BUILD_DATE: ${{ needs.prepare.outputs.build_date }}
+      APP_ENV: ${{ github.event_name == 'pull_request' && 'preview' || needs.prepare.outputs.app_env }}
+      ALLOWED_ORIGINS: ${{ needs.prepare.outputs.allowed_origins }}
+      GH_USERNAME: ${{ vars.GH_USERNAME }}
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      WORKER_NAME: ${{ github.event_name == 'pull_request' && format('{0}-preview', needs.prepare.outputs.app_name) || needs.prepare.outputs.app_name }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Sync Cloudflare Worker secrets
+        run: |
+          printf '%s' "$GH_USERNAME" | npx wrangler secret put GH_USERNAME --name "$WORKER_NAME"
+          printf '%s' "$GH_TOKEN" | npx wrangler secret put GH_TOKEN --name "$WORKER_NAME"
+
+      - name: Generate Worker env config
+        run: |
+          APP_NAME="$APP_NAME" APP_VERSION="$APP_VERSION" BUILD_COMMIT="$BUILD_COMMIT" BUILD_DATE="$BUILD_DATE" APP_ENV="$APP_ENV" ALLOWED_ORIGINS="$ALLOWED_ORIGINS" GH_USERNAME="$GH_USERNAME" node scripts/ci/prepare.mjs --write
+
+      - name: Deploy to Cloudflare Workers
+        run: |
+          npx wrangler deploy \
+            --name "$WORKER_NAME" \
+            --var APP_NAME="$APP_NAME" \
+            --var APP_VERSION="$APP_VERSION" \
+            --var BUILD_COMMIT="$BUILD_COMMIT" \
+            --var BUILD_DATE="$BUILD_DATE" \
+            --var APP_ENV="$APP_ENV" \
+            --var ALLOWED_ORIGINS="$ALLOWED_ORIGINS" \
+            --var GH_USERNAME="$GH_USERNAME"
