@@ -1,10 +1,10 @@
-# **Better** Repos
+# Better `Repos`
 
 [![Test coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/euaaron/better-repos/badges/.github/badges/coverage.json)](https://github.com/euaaron/better-repos/actions/workflows/deploy.yml)
 [![Deployment](https://img.shields.io/github/actions/workflow/status/euaaron/better-repos/deploy.yml?branch=main&job=deploy&label=deployment)](https://github.com/euaaron/better-repos/actions/workflows/deploy.yml)
 [![Version](https://img.shields.io/github/package-json/v/euaaron/better-repos?label=version)](https://github.com/euaaron/better-repos/blob/main/package.json)
 
-**Better** `Repos` is a Cloudflare Worker that exposes a GitHub profile's public repositories in a clean, portfolio-friendly API format.
+**Better `Repos`** is a Cloudflare Worker that exposes a GitHub profile's public repositories in a clean, portfolio-friendly API format.
 
 It gathers repository metadata such as name, description, homepage, language, README content, tags, and project similarity signals, making it easier to build developer portfolios, project showcases, or internal catalog tools.
 
@@ -92,33 +92,15 @@ npm install
 npm run dev
 ```
 
-The application will be available at:
+The application will be available at [http://127.0.0.1:8787/](http://127.0.0.1:8787/).
 
-- http://127.0.0.1:8787/
-- http://127.0.0.1:8787/health
-- http://127.0.0.1:8787/info
-- http://127.0.0.1:8787/repos
-- http://127.0.0.1:8787/repos/<repo_name>
-
-### Health check example
-
-```bash
-curl http://127.0.0.1:8787/health
-```
-
-### Info example
-
-```bash
-curl http://127.0.0.1:8787/info
-```
-
-### Example request: cURL
+### Example of a paginated `/repos` request with cURL
 
 ```bash
 curl -H "X-Page: 1" -H "X-Page-Size: 10" http://127.0.0.1:8787/repos
 ```
 
-### Example request: fetch
+### Example of a paginated `/repos` request with fetch
 
 ```javascript
 const response = await fetch('http://127.0.0.1:8787/repos', {
@@ -146,8 +128,8 @@ npm run deploy
 ## Author
 
 <a href="https://github.com/euaaron">
-  <figure align="center">
+  <div align="center">
     <img src="https://github.com/euaaron.png" width="20%" />
-    <figcaption>Aaron Carneiro</figcaption>
-  </figure>
+    <p>Aaron Carneiro</p>
+  </div>
 </a>
